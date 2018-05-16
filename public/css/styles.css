@@ -1,0 +1,9 @@
+main{
+    text-align: center;
+}
+main form{
+    display: inline-grid;
+}
+input, button{
+    margin: 10px 0;
+}

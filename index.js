@@ -1,15 +1,23 @@
 const Sequelize = require('sequelize');
 const express = require('express');
-const bodyParser = require('body-parser')
-const app = express();
+const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
+const session = require('express-session');
+const passport = require('passport');
+const LocalStrategy = require('passport-local').Strategy;
+
+const COOKIE_SECRET = 'cookie secret';
+
 
 const db = new Sequelize('blognode', 'root', '', {
     host: 'localhost',
     dialect: 'mysql'
 });
 const User = db.define('user', {
-    fullname: { type: Sequelize.STRING },
-    email: { type: Sequelize.STRING }
+    firstname: { type: Sequelize.STRING },
+    lastname: { type: Sequelize.STRING },
+    email: { type: Sequelize.STRING },
+    password: { type: Sequelize.STRING }
 });
 
 const Comment = db.define('comment', {
@@ -54,18 +62,22 @@ function createUser() {
 
     User
         .sync()
-        .then(() => {
+        /*.then(() => {
             User.create({
-                fullname: 'Jane Doe',
-                email: 'jane.doe@gmail.com'
+                firstname: 'Jane',
+                lastname: 'Doe',
+                email: 'jane.doe@gmail.com',
+                password: '123'
             });
         })
         .then(() => {
             User.create({
-                fullname: 'John Doe',
-                email: 'john.doe@gmail.com'
+                firstname: 'Jane',
+                lastname: 'Doe',
+                email: 'john.doe@gmail.com',
+                password: '321'
             });
-        })
+        })*/
         .then(() => {
             return User.findAll();
         })
@@ -88,6 +100,47 @@ function createPost(){
             })
         });
 }
+
+const app = express();
+
+app.set('view engine', 'pug');
+app.use(express.static('public'));
+app.use(bodyParser.urlencoded({ extended: true }));
+//----------------Authentification------------------
+
+//--------------------------------------------------
+
+//---------------Création utilisateurs--------------
+
+app.get('/api/signUp', (req, res) => {
+    res.render('signUp');
+})
+
+app.post('/api/signUp', (req, res) => {
+    const firstname = req.body.firstname;
+    const lastname = req.body.lastname;
+    const email = req.body.email;
+    const password = req.body.password;
+
+    if()
+    User
+        .create({
+            firstname: firstname,
+            lastname: lastname,
+            email: email,
+            password: password
+        })
+        .then(() => {
+            res.redirect('/');
+        })
+        .catch((error) =>{
+            res.render('500', {error: error})
+        });
+});
+
+//--------------------------------------------------
+
+
 app.post('/api/post/:postId/upvote', (req, res) => {
     Vote
         .create({action: 'up', postId: req.params.postId})
@@ -100,9 +153,6 @@ app.post('/api/post/:postId/downvote', (req, res) => {
         .then(() => res.redirect('/'));
 });
 
-app.set('view engine', 'pug');
-app.use(express.static('public'));
-app.use(bodyParser.urlencoded({ extended: true }));
 
 app.get('/', (req, res) => {
     Post
@@ -123,14 +173,15 @@ app.post('/api/post', (req, res) => {
     });
 });
 
-/*db
-    .sync();
+
+db
+    .sync()
     .then(() =>{
         app.listen(3000, () => {
             console.log('Listening on port 3000');
         });
     });
-    */
-app.listen(3000, () => {
+
+/*app.listen(3000, () => {
     console.log('Listening on port 3000');
-});
+});*/
