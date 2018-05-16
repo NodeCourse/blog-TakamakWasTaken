@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/NodeCourse/blog-TakamakWasTaken#readme",
   "dependencies": {
+    "body-parser": "^1.18.3",
     "express": "^4.16.3",
     "mysql2": "^1.5.3",
     "pug": "^2.0.3",

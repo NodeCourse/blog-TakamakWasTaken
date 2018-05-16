@@ -1,7 +1,13 @@
 for post in posts
     article
         h1 #{post.title}
+        p #{post.score}
         form(method="post", action="/api/post/" + post.id + "/upvote")
             button(type="submit") upvote
-        form(method="post", action="/api/post/" + post.id + "/upvote")
+        form(method="post", action="/api/post/" + post.id + "/downvote")
             button(type="submit") downvote
+
+
+form(method="post", action ="/api/post")
+    input(type="text", name="title")
+    button(type="submit") Envoyer
