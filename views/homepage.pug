@@ -1,0 +1,7 @@
+for post in posts
+    article
+        h1 #{post.title}
+        form(method="post", action="/api/post/" + post.id + "/upvote")
+            button(type="submit") upvote
+        form(method="post", action="/api/post/" + post.id + "/upvote")
+            button(type="submit") downvote
