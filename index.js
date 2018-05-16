@@ -104,10 +104,52 @@ function createPost(){
 const app = express();
 
 app.set('view engine', 'pug');
+app.use(cookieParser(COOKIE_SECRET));
 app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(session({
+    secret: COOKIE_SECRET,
+    resave: false,
+    saveUninitialized: false
+}));
+
+// Initialize passport, it must come after Express' session() middleware
+app.use(passport.initialize());
+app.use(passport.session());
+
 //----------------Authentification------------------
 
+passport.use(new LocalStrategy((email, password, cb) => {
+
+    // Find a user with the provided username (which is an email address in our case)
+    User
+        .findOne({ email, password })
+        .then(user => {
+            if(!user || user.password !== password){
+                return cb(null, false, {
+                    error: "email ou mot de passe inconnu."
+                });
+            }
+            else{
+                return cb(null, user);
+            }
+
+        });
+}));
+
+// Save the user's email address in the cookie
+passport.serializeUser((user, cb) => {
+    console.log(user);
+    cb(null, user.email);
+});
+
+passport.deserializeUser((email, cb) => {
+    // Fetch the user record corresponding to the provided email address
+    User.findOne({ email })
+        .then((user) =>{
+            cb(null, user);
+        })
+});
 //--------------------------------------------------
 
 //---------------Création utilisateurs--------------
@@ -122,20 +164,24 @@ app.post('/api/signUp', (req, res) => {
     const email = req.body.email;
     const password = req.body.password;
 
-    if()
-    User
-        .create({
-            firstname: firstname,
-            lastname: lastname,
-            email: email,
-            password: password
-        })
-        .then(() => {
-            res.redirect('/');
-        })
-        .catch((error) =>{
-            res.render('500', {error: error})
-        });
+    if(firstname != null && lastname != null && email != null && password != null){
+        User
+            .create({
+                firstname: firstname,
+                lastname: lastname,
+                email: email,
+                password: password
+            })
+            .then(() => {
+                res.redirect('/');
+            })
+            .catch((error) =>{
+                res.render('500', {error: error})
+            });
+    }
+    else{
+        console.log("L'utilisateur n'a pas pu être créé.")
+    }
 });
 
 //--------------------------------------------------
@@ -157,7 +203,7 @@ app.post('/api/post/:postId/downvote', (req, res) => {
 app.get('/', (req, res) => {
     Post
         .findAll({ include: [Vote] })
-        .then(posts => res.render('homepage', { posts }));
+        .then(posts => res.render('homepage', { posts, user: req.user }));
 
 });
 
@@ -173,6 +219,20 @@ app.post('/api/post', (req, res) => {
     });
 });
 
+app.get('/login', (req, res) => {
+    // Render the login page
+    res.render('login');
+});
+
+app.post('/login',
+    // Authenticate user when the login form is submitted
+    passport.authenticate('local', {
+        // If authentication succeeded, redirect to the home page
+        successRedirect: '/',
+        // If authentication failed, redirect to the login page
+        failureRedirect: '/api/signUp'
+    })
+);
 
 db
     .sync()
