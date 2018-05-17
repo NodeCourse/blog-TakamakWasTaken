@@ -1,9 +1,24 @@
-main{
+main, body{
     text-align: center;
 }
-main form{
+.verticalFlow{
     display: inline-grid;
 }
+.horizontalFlow{
+    display: inline-flex;
+}
+.horizontalFlow div{
+    margin: 0 20px;
+}
+.horizontalFlow div form{
+    margin: 0;
+}
+
+
+
 input, button{
     margin: 10px 0;
+}
+a{
+    margin-left:20px;
 }

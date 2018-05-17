@@ -4,9 +4,12 @@ html
         link(rel="stylesheet", href="/css/styles.css")
     body
         main
-            form(method="POST")
-                input(type="text", name="firstname", placeholder="Prénom")
-                input(type="text", name="lastname", placeholder="Nom")
-                input(type="text", name="email", placeholder="Email")
-                input(type="password", name="password", placeholder="Mot de passe")
-                button(type="submit") Envoyer
+            if user
+                h1 Hello #{user.firstname} #{user.lastname}
+            else
+                form(method="POST")
+                    input(type="text", name="firstname", placeholder="Prénom")
+                    input(type="text", name="lastname", placeholder="Nom")
+                    input(type="text", name="email", placeholder="Email")
+                    input(type="password", name="password", placeholder="Mot de passe")
+                    button(type="submit") Envoyer

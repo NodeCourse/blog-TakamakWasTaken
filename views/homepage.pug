@@ -1,22 +1,33 @@
-if user
-    h1 Welcome #{user.firstname} #{user.lastname}!
-else
-    p Please log in.
-    a(href="/login") Log in
+html
+    head
+        link(rel="stylesheet", href="/css/styles.css")
+    main
+        if user
+            h1 Welcome #{user.firstname} #{user.lastname}!
+        else
+            h1 Connectez-vous ou créez un compte:
+            div.alignement
+                a(href="/api/login") Log in
+                a(href="/api/signUp") Sign up
 
-for post in posts
-    article
-        h1 #{post.title}
-        p #{post.score}
-        form(method="post", action="/api/post/" + post.id + "/upvote")
-            button(type="submit") upvote
-        form(method="post", action="/api/post/" + post.id + "/downvote")
-            button(type="submit") downvote
+        if(posts.length === 0)
+            p Aucun article!
+        else
+            h2 ***** Articles *****
+            div.verticalFlow
+                for post in posts
+                    article.horizontalFlow
+                        div
+                            form(method="post", action="/api/post/" + post.id + "/upvote")
+                                button(type="submit") upvote
+                            form(method="post", action="/api/post/" + post.id + "/downvote")
+                                button(type="submit") downvote
+                        div
+                            h1 #{post.title}
+                            p #{post.score}
 
 
-form(method="post", action ="/api/post")
-    input(type="text", name="title")
-    button(type="submit") Envoyer
-
-div
-    a(href="/api/signUp") Créez un compte
+        p Ajouter un article:
+        form.verticalFlow(method="post", action ="/api/post")
+            input(type="text", name="title", placeholder="Titre")
+            button(type="submit") Envoyer

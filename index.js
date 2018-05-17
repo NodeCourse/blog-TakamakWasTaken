@@ -93,11 +93,6 @@ function createPost(){
             Post.create({
                 title: 'News de Sbire1'
             });
-        })
-        .then(() => {
-            Post.create({
-                title: 'Sbire2 no post'
-            })
         });
 }
 
@@ -123,34 +118,39 @@ passport.use(new LocalStrategy((email, password, cb) => {
 
     // Find a user with the provided username (which is an email address in our case)
     User
-        .findOne({ email, password })
+        .findOne({ where: {
+                email, password
+            }
+        })
         .then(user => {
-            if(!user || user.password !== password){
+            if(user){
+                return cb(null, user);
+            }
+            else{
                 return cb(null, false, {
                     error: "email ou mot de passe inconnu."
                 });
             }
-            else{
-                return cb(null, user);
-            }
-
         });
 }));
 
 // Save the user's email address in the cookie
 passport.serializeUser((user, cb) => {
-    console.log(user);
     cb(null, user.email);
 });
 
-passport.deserializeUser((email, cb) => {
+passport.deserializeUser((username, cb) => {
     // Fetch the user record corresponding to the provided email address
-    User.findOne({ email })
+    User
+        .findOne({ where: {
+            email: username
+        }})
+
         .then((user) =>{
             cb(null, user);
         })
 });
-//--------------------------------------------------
+//-----------------------Authentification Fin---------------------------
 
 //---------------Création utilisateurs--------------
 
@@ -172,8 +172,10 @@ app.post('/api/signUp', (req, res) => {
                 email: email,
                 password: password
             })
-            .then(() => {
+            .then((user) => {
+            req.login(user, () => {
                 res.redirect('/');
+                });
             })
             .catch((error) =>{
                 res.render('500', {error: error})
@@ -219,18 +221,18 @@ app.post('/api/post', (req, res) => {
     });
 });
 
-app.get('/login', (req, res) => {
+app.get('/api/login', (req, res) => {
     // Render the login page
     res.render('login');
 });
 
-app.post('/login',
+app.post('/api/login',
     // Authenticate user when the login form is submitted
     passport.authenticate('local', {
         // If authentication succeeded, redirect to the home page
         successRedirect: '/',
         // If authentication failed, redirect to the login page
-        failureRedirect: '/api/signUp'
+        failureRedirect: '/api/login'
     })
 );
 
